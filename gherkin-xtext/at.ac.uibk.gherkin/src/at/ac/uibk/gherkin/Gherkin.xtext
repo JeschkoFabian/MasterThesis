@@ -1,0 +1,177 @@
+grammar at.ac.uibk.gherkin.Gherkin hidden (WS, SL_COMMENT) 
+
+generate gherkin "http://www.ac.at/uibk/gherkin/Gherkin"
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+Feature:
+	{Feature}
+	NL*
+	header=FeatureHeader?
+	desc=Description?
+	background=Background?
+	scenarios+=Scenario*
+;
+
+FeatureHeader:
+	{FeatureHeader}
+	tags=Tags? 
+	keyword=FEATURE_HEADER_TYPE name+=GenericText* NL+
+;
+
+//FeatureHeaderType:
+//	FEATURE_HEADER_TYPE ":"?
+//;
+
+Description:
+	lines+=DescriptionLine+
+;
+
+DescriptionLine:
+	name+=SCENARIO_TYPE? name+=NoTagText name+=GenericText* NL+ 
+;
+
+ScenarioDescription:
+	lines+=ScenarioDescriptionLine+
+;
+
+ScenarioDescriptionLine:
+	// first word is not allowed to be a keyword
+	name+=SCENARIO_TYPE? name+=NoTagStepText name+=GenericText* NL+
+;
+
+ExamplesDescription:
+	lines+=ExamplesDescriptionLine+
+;
+
+ExamplesDescriptionLine:
+	// first word is not allowed to be a keyword
+	name+=SCENARIO_TYPE? name+=NoTableTagText name+=NoTableText* NL+
+;
+
+Background:
+	{Background}
+	tags=Tags?
+	keyword=BACKGROUND_TYPE name+=GenericText* NL+
+	desc=ScenarioDescription?
+	steps+=Step*
+;
+
+//BackgroundType:
+//	BACKGROUND_TYPE ":"?
+//;
+
+Scenario:
+	{Scenario}
+	tags=Tags?
+	keyword=ScenarioType name+=GenericText* NL+ 
+	desc=ScenarioDescription?
+	steps+=Step*
+	examples+=Examples*
+;
+
+ScenarioType:
+	(SCENARIO_TYPE OUTLINE_TYPE) | SCENARIO_TYPE_COLON
+;
+
+Examples:
+	{Examples}
+	tags=Tags?
+	keyword=EXAMPLES_TYPE name+=GenericText* NL+ 
+	desc=ExamplesDescription?
+	table=Table?
+;
+
+//ExamplesType:
+//	EXAMPLES_TYPE ":"?
+//;
+
+Table:
+	rows+=Row+
+;
+
+Row:
+	"|" (cells+=Cell "|")+ NL+ 
+;
+
+Cell:
+	{Cell}
+	name+=NoTableText*
+;
+
+Step:
+	tags=Tags?
+	keyword=STEP_NAME name+=GenericText* NL+  
+	(docString+=CODE NL+)? table=Table?
+;
+
+Tags:
+	(tags+=TAG NL*)+
+;
+
+GenericText:
+	TEXT | Keywords | TAG | ESCAPED_SYMBOL | '|' | CODE
+;
+
+NoTagText:
+	TEXT | STEP_NAME | ESCAPED_SYMBOL | '|' | CODE
+;
+
+NoTagStepText:
+	TEXT | ESCAPED_SYMBOL | "|" | CODE
+;
+
+NoTableText:
+	TEXT | Keywords | TAG | ESCAPED_SYMBOL
+;
+
+NoTableTagText:
+	TEXT | STEP_NAME | ESCAPED_SYMBOL
+;
+
+Keywords:
+	FEATURE_HEADER_TYPE | BACKGROUND_TYPE | 
+	SCENARIO_TYPE_COLON | SCENARIO_TYPE | 
+	OUTLINE_TYPE | EXAMPLES_TYPE | STEP_NAME
+;
+
+//terminal CELL_TEXT: !('\n' | '\r' | '|' | ' ' | '\t')*;
+//terminal STRING: "\"" !("\"" | "\n" | "\r") -> "\"" | "'" !("'" | "\n" | "\r") -> "'" | "´" !("´" | "\n" | "\r") -> "´";
+
+terminal FEATURE_HEADER_TYPE: (
+	"Feature" | 
+	"Narrative" | 
+	"Ability") ':'
+;
+terminal BACKGROUND_TYPE: "Background:";
+terminal SCENARIO_TYPE_COLON: "Scenario:";
+terminal SCENARIO_TYPE : "Scenario";
+terminal OUTLINE_TYPE: "Outline:";
+terminal EXAMPLES_TYPE: ("Examples" | "Scenarios") ':';
+terminal STEP_NAME: (
+	(('G' | 'g') "iven") | 
+	(('W' | 'w') "hen")  | 
+	(('T' | 't') "hen")  | 
+	(('A' | 'a') "nd")   | 
+	(('B' | 'b') "ut")   | 
+	"*" | 
+	"I" | 
+	"Check"
+	) ':'?
+;
+
+terminal NL: ('\r'* '\n') | EOF;
+// code in the form """ -> """ or with sinlge commas, multiple lines possible
+terminal CODE: '"""' -> '"""' | "'''" -> "'''" | "```" -> "```";
+// generic tags
+terminal TAG: '@' !('\n' | '\r' | ' ' | '\t' | '|')*;
+// comment, always whole line, problems when its inside tables but not supposed to be a comment
+terminal SL_COMMENT: '#' !('\r' | '\n')*;
+// a symbol thats escaped
+terminal ESCAPED_SYMBOL: '\\' !('\n' | '\r' | ' ' | '\t')? ;
+
+// generic text
+//terminal TEXT: !('|' | '\r' | '\n' | '@' | ' ' | '\t' | '#') (!('|' | '\r' | '\n' | ' ' | '\t') | "\\|")*;
+terminal TEXT: !('|' | '\r' | '\n' | ' ' | '\t' | '\\')+;
+// whitespaces limited to space and tab, since NL has impact on the language
+terminal WS  : (' '|'\t')+;

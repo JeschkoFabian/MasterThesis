@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: at.ac.uibk.gherkin
+Bundle-Vendor: University of Innsbruck
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: at.ac.uibk.gherkin; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib,
+ org.antlr.runtime,
+ org.eclipse.xtext.util,
+ org.eclipse.xtend.lib,
+ org.eclipse.emf.common
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: at.ac.uibk.gherkin,
+ at.ac.uibk.gherkin.parser.antlr,
+ at.ac.uibk.gherkin.parser.antlr.internal,
+ at.ac.uibk.gherkin.gherkin.impl,
+ at.ac.uibk.gherkin.validation,
+ at.ac.uibk.gherkin.generator,
+ at.ac.uibk.gherkin.services,
+ at.ac.uibk.gherkin.gherkin.util,
+ at.ac.uibk.gherkin.scoping,
+ at.ac.uibk.gherkin.serializer,
+ at.ac.uibk.gherkin.gherkin
+Import-Package: org.apache.log4j,
+ org.apache.commons.lang3
